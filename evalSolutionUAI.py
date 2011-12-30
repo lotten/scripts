@@ -160,4 +160,4 @@ if __name__ == "__main__":
   for i, assignment in enumerate(assignments):
     cost = model.evaluate_assignment(assignment)
     if cost != None:
-      print "Assignment %i cost:\t%f\t/ %f" % (i, cost, from_log10(cost))
+      print "Assignment %i log cost:\t%f" % (i, cost)
