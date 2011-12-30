@@ -94,7 +94,7 @@ class ModelInstance:
     # Read function scopes
     self.num_funs = int(T[i])
     i += 1
-    print "Numver of problem functions: %i" % self.num_funs
+    print "Number of problem functions: %i" % self.num_funs
     fun_scopes = [[]] * self.num_funs
     for j in range(self.num_funs):
       scope_size = int(T[i])
@@ -111,12 +111,34 @@ class ModelInstance:
       i += table_size
       self.functions.append(Function(j, fun_scopes[j], table))
 
+  def evaluate_assignment(self, assignment):
+    """Calculates the cost of a given assignment"""
+    return 0.0  # TODO calculate assignment cost
+
+
+def parse_assignments(num_vars, args):
+  """parses full assignments from command line arguments"""
+  i = 0
+  assignments = []
+  while i < len(args):
+    if args[i] == str(num_vars):
+      assignments.append(map(int, args[i : i + num_vars]))
+      i += num_vars
+    else:
+      i += 1
+  print "Found %i assignment(s)" % len(assignments)
+  return assignments
+  
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
     print "Specify model file"
     sys.exit(1)
+
   model = ModelInstance()
   model.read_model_uai(sys.argv[1])
 
-  # TODO: Read assignment from command line and compute its cost
+  assignments = parse_assignments(model.num_vars, sys.argv[2:])
+  for i, assignment in enumerate(assignments):
+    cost = model.evaluate_assignment(assignment)
+    print "Assignment %i cost:\t%f" % (i, cost)
