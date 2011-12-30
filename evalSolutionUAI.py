@@ -78,8 +78,8 @@ class ModelInstance:
     """Reads a graphical from UAI file"""
     with open(filename, "r") as f:
       T = f.read().strip().split()
-  
     i = 0  # poor man's tokenizer
+  
     type = T[i]
     i += 1
     print "Reading %s network from file %s" % (type, filename)
@@ -113,7 +113,24 @@ class ModelInstance:
 
   def evaluate_assignment(self, assignment):
     """Calculates the cost of a given assignment"""
-    return 0.0  # TODO calculate assignment cost
+
+    # Sanity check against domain sizes
+    for i, v in enumerate(assignment):
+      if v >= self.domains[i]:
+        print "Value %i for variable %i out of range, skipping assignment." % (v,i)
+        return None
+
+    # Sum of costs over all functions
+    cost = 0.0
+    for f in self.functions:
+      scope = f.scope
+      domains = [ self.domains[v] for v in scope ]
+      index = 0  # Calculate index in function table
+      for i in range(len(scope)):
+        index += assignment[scope[i]] * reduce(
+          lambda x,y: x*y, domains[i+1:], 1)
+      cost += f.table[index]
+    return cost
 
 
 def parse_assignments(num_vars, args):
@@ -122,6 +139,7 @@ def parse_assignments(num_vars, args):
   assignments = []
   while i < len(args):
     if args[i] == str(num_vars):
+      i += 1
       assignments.append(map(int, args[i : i + num_vars]))
       i += num_vars
     else:
@@ -141,4 +159,5 @@ if __name__ == "__main__":
   assignments = parse_assignments(model.num_vars, sys.argv[2:])
   for i, assignment in enumerate(assignments):
     cost = model.evaluate_assignment(assignment)
-    print "Assignment %i cost:\t%f" % (i, cost)
+    if cost != None:
+      print "Assignment %i cost:\t%f\t/ %f" % (i, cost, from_log10(cost))
