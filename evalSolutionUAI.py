@@ -33,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import os, sys
-from math import log10, pow
+from math import log10, pow, fsum
 
 
 INFINITY = float("inf")
@@ -120,8 +120,8 @@ class ModelInstance:
         print "Value %i for variable %i out of range, skipping assignment." % (v,i)
         return None
 
-    # Sum of costs over all functions
-    cost = 0.0
+    # Collect cost of each function
+    costs = []
     for f in self.functions:
       scope = f.scope
       domains = [ self.domains[v] for v in scope ]
@@ -129,8 +129,8 @@ class ModelInstance:
       for i in range(len(scope)):
         index += assignment[scope[i]] * reduce(
           lambda x,y: x*y, domains[i+1:], 1)
-      cost += f.table[index]
-    return cost
+      costs.append(f.table[index])
+    return fsum(costs)  # numerically stable sum
 
 
 def parse_assignments(num_vars, args):
@@ -161,3 +161,11 @@ if __name__ == "__main__":
     cost = model.evaluate_assignment(assignment)
     if cost != None:
       print "Assignment %i log cost:\t%f" % (i, cost)
+
+  """
+  # The following code can be used to compare assignments
+  for i in range(len(assignments[0])):
+    tup = [ a[i] for a in assignments ]
+    if not all(map(lambda x: x==tup[0], tup)):
+      print i, tup
+  """
