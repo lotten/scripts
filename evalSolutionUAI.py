@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import os, sys
+import gzip
 from math import log10, pow, fsum
 
 
@@ -76,8 +77,12 @@ class ModelInstance:
 
   def read_model_uai(self, filename):
     """Reads a graphical from UAI file"""
-    with open(filename, "r") as f:
-      T = f.read().strip().split()
+    if filename[-3:] == ".gz":
+      with gzip.open(filename, "r") as f:
+        T = f.read().strip().split()
+    else:
+      with open(filename, "r") as f:
+        T = f.read().strip().split()
     i = 0  # poor man's tokenizer
   
     type = T[i]
